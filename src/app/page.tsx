@@ -1,16 +1,28 @@
 'use client';
 import { useState } from 'react';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setStatus('loading');
-    // Simulate network request for now
-    setTimeout(() => setStatus('success'), 1500);
+
+    try {
+      await addDoc(collection(db, 'waitlist'), {
+        email: email.trim(),
+        timestamp: serverTimestamp()
+      });
+      setStatus('success');
+    } catch (err) {
+      console.error("Error adding document: ", err);
+      setStatus('idle');
+      alert("Failed to secure position. Try again.");
+    }
   };
 
   return (
