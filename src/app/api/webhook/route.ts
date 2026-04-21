@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, getDoc, increment } from 'firebase/firestore';
 import nodemailer from 'nodemailer';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
@@ -41,11 +41,27 @@ export async function POST(req: Request) {
         // Find the user directly via ID to bypass restrictive Firebase Read rules
         const docRef = doc(db, 'waitlist', waitlistId);
 
+        // Fetch to see if they have a referrer
+        const docSnap = await getDoc(docRef);
+        const referrerId = docSnap.exists() ? docSnap.data().referrerId : null;
+
         // Update their status to 'paid'
         await updateDoc(docRef, {
           paymentStatus: 'paid'
         });
         console.log(`Successfully updated Firebase for paid user: ${email} (${waitlistId})`);
+
+        if (referrerId) {
+          const referrerRef = doc(db, 'waitlist', referrerId);
+          try {
+            await updateDoc(referrerRef, {
+              referralCount: increment(1)
+            });
+            console.log(`Incremented referralCount for referrer: ${referrerId}`);
+          } catch (e) {
+            console.error('Failed to increment referrer:', e);
+          }
+        }
 
         // Shoot out the brutal welcome email
         const mailOptions = {

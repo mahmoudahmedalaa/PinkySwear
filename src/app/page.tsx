@@ -1,23 +1,31 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Leaderboard from '@/components/Leaderboard';
 
-export default function WaitlistPage() {
+function WaitlistContent() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const searchParams = useSearchParams();
+  const referrerId = searchParams?.get('ref') || null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !name) return;
     setStatus('loading');
 
     try {
       // Execute Firebase write and get document ID explicitly
       const docRef = await addDoc(collection(db, 'waitlist'), {
+        name: name.trim(),
         email: email.trim(),
         timestamp: serverTimestamp(),
-        paymentStatus: 'pending'
+        paymentStatus: 'pending',
+        referrerId: referrerId,
+        referralCount: 0
       });
 
       // Pass the docRef.id to Stripe to bypass Firebase read restrictions
@@ -106,6 +114,15 @@ export default function WaitlistPage() {
             ) : (
               <form className="flex flex-col xl:flex-row gap-4 mt-2" onSubmit={handleSubmit}>
                 <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={status === 'loading'}
+                  placeholder="YOUR FULL NAME"
+                  className="flex-1 px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold border-box w-full uppercase disabled:opacity-50 transition-colors"
+                  required
+                />
+                <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -184,6 +201,8 @@ export default function WaitlistPage() {
         </div>
       </section>
 
+      <Leaderboard />
+
       {/* Marquee Banner */}
       <div className="w-full border-y-4 border-black bg-[#00FF66] py-3 mt-12 overflow-hidden whitespace-nowrap flex font-black uppercase tracking-widest text-lg md:text-xl transform -rotate-1 scale-105 shadow-[0px_8px_0px_0px_#000]">
         <div className="animate-marquee inline-block">
@@ -192,5 +211,13 @@ export default function WaitlistPage() {
       </div>
 
     </main>
+  );
+}
+
+export default function WaitlistPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <WaitlistContent />
+    </Suspense>
   );
 }
