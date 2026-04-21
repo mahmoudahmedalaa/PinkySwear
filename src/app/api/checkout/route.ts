@@ -20,7 +20,6 @@ export async function POST(req: Request) {
                         product_data: {
                             name: 'PinkySwear Bailout Token',
                             description: 'Pre-order token to cover your first $100 mistake when the app launches.',
-                            images: ['https://pinkyswear.app/pinky_t.png'], // Placeholder
                         },
                         unit_amount: 500, // $5.00
                     },

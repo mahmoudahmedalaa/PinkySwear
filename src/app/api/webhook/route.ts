@@ -54,9 +54,6 @@ export async function POST(req: Request) {
           subject: "You're On The Hook. No Backing Out Now.",
           html: `
             <div style="font-family: Arial, sans-serif; background-color: #fff; padding: 40px; border: 8px solid black; max-width: 600px; margin: 0 auto;">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <img src="https://pinkyswear.app/pinky_t.png" alt="PinkySwear Chameleon" style="width: 120px; border: 4px solid black;" />
-              </div>
               <h1 style="color: #FF003C; text-transform: uppercase; font-weight: 900; font-size: 32px; letter-spacing: -1px; margin-top: 0; text-align: center;">
                 Bailout Token Secured.
               </h1>
