@@ -13,13 +13,28 @@ export default function WaitlistPage() {
     setStatus('loading');
 
     try {
+      // 1. Secure email in Firebase as pending
       await addDoc(collection(db, 'waitlist'), {
         email: email.trim(),
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        paymentStatus: 'pending'
       });
-      setStatus('success');
+
+      // 2. Initialize Stripe Checkout
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url; // Proceed to Stripe
+      } else {
+        throw new Error(data.error || 'Failed to initialize secure checkout');
+      }
     } catch (err) {
-      console.error("Error adding document: ", err);
+      console.error("Checkout initialization failed: ", err);
       setStatus('idle');
       alert("Failed to secure position. Try again.");
     }
@@ -56,41 +71,54 @@ export default function WaitlistPage() {
             The ultimate absolute-zero-excuses accountability app. Tell Pinky what you are going to do, and put your credit card on the line.
           </p>
 
-          <p className="text-lg font-bold text-gray-700 max-w-md">
+          <p className="text-lg font-bold text-gray-700 max-w-md hidden md:block">
             Hit your deadline, and you pay nothing. Miss it, and Pinky takes your money. No refunds. No excuses.
           </p>
 
           {/* Brutalist Input Form */}
-          <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_#000] flex flex-col gap-6 mt-4 w-full">
+          <div className="bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_#000] flex flex-col gap-6 mt-4 w-full">
             <div>
-              <h3 className="font-black text-2xl uppercase tracking-tight">Pre-Order a Bailout Token</h3>
-              <p className="font-semibold text-sm text-gray-700 mt-2 leading-relaxed">
-                You <span className="underline decoration-[#FF003C] decoration-4 underline-offset-4">*will*</span> fail your first task. Put $5 down right now to pre-order a Bailout Token, and Pinky will cover your first $100 mistake when the app drops.
-              </p>
+              <h3 className="font-black text-3xl md:text-4xl uppercase tracking-tighter text-[#FF003C] leading-none mb-4">
+                Pre-Order a Bailout Token
+              </h3>
+
+              <div className="bg-gray-100 border-l-8 border-black p-4 mt-2">
+                <p className="font-black text-xl md:text-2xl text-black leading-snug">
+                  You <span className="underline decoration-[#FF003C] decoration-4 underline-offset-4">*will*</span> fail your first task.
+                </p>
+                <p className="font-bold text-base md:text-lg text-gray-800 mt-3 leading-snug">
+                  Put <span className="bg-[#00FF66] px-1 border border-black font-black">$5 down right now</span> to pre-order a Bailout Token. Pinky will cover your first $100 mistake when the app drops.
+                </p>
+              </div>
             </div>
 
             {status === 'success' ? (
-              <div className="bg-[#00FF66] border-4 border-black p-4 text-center transform transition-all shadow-[4px_4px_0px_0px_#000]">
-                <h4 className="font-black text-xl uppercase">You&#39;re on the hook.</h4>
-                <p className="font-bold text-sm">We&#39;ll email you when it drops. No running away now.</p>
+              <div className="bg-[#00FF66] border-4 border-black p-6 text-center transform transition-all shadow-[4px_4px_0px_0px_#000] flex flex-col items-center justify-center">
+                <h4 className="font-black text-2xl uppercase">You&#39;re on the hook.</h4>
+                <p className="font-bold text-base mt-2">We&#39;ll alert you when we launch. No running away now.</p>
               </div>
             ) : (
-              <form className="flex flex-col sm:flex-row gap-4 align-stretch" onSubmit={handleSubmit}>
+              <form className="flex flex-col xl:flex-row gap-4 mt-2" onSubmit={handleSubmit}>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={status === 'loading'}
                   placeholder="YOUR.EMAIL@LOSER.COM"
-                  className="flex-1 px-5 py-4 text-base font-black border-4 border-black bg-gray-50 focus:bg-[#00FF66]/20 outline-none placeholder:text-gray-400 placeholder:font-bold uppercase disabled:opacity-50"
+                  className="flex-1 px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold border-box w-full uppercase disabled:opacity-50 transition-colors"
                   required
                 />
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="px-6 xl:px-8 py-4 bg-[#FF003C] text-white text-lg font-black uppercase tracking-wider border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#000] transition-all whitespace-nowrap cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_0px_#000]"
+                  className="px-8 py-5 bg-[#FF003C] text-white text-xl font-black uppercase tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#000] transition-all whitespace-nowrap cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0px_0px_#000] flex items-center justify-center gap-3"
                 >
-                  {status === 'loading' ? 'BETTING...' : 'Bet On Yourself'}
+                  {status === 'loading' ? (
+                    <>
+                      <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Betting...
+                    </>
+                  ) : 'Bet On Yourself'}
                 </button>
               </form>
             )}
