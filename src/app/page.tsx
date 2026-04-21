@@ -143,6 +143,10 @@ function WaitlistContent() {
                     </>
                   ) : 'Lock In & Pre-Order'}
                 </button>
+
+                <p className="text-xs font-bold text-gray-500 uppercase text-center mt-2">
+                  By locking in, you accept our <a href="/tos" target="_blank" className="underline hover:text-black">Terms of Service & No Refund Policy</a>.
+                </p>
               </form>
             )}
           </div>
