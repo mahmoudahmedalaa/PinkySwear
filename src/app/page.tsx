@@ -118,7 +118,7 @@ function WaitlistContent() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={status === 'loading'}
-                  placeholder="1. ENTER YOUR FULL NAME"
+                  placeholder="YOUR FULL NAME"
                   className="w-full px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold uppercase disabled:opacity-50 transition-colors"
                   required
                 />
@@ -127,7 +127,7 @@ function WaitlistContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={status === 'loading'}
-                  placeholder="2. ENTER YOUR BEST EMAIL"
+                  placeholder="YOUR.EMAIL@LOSER.COM"
                   className="w-full px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold uppercase disabled:opacity-50 transition-colors"
                   required
                 />
