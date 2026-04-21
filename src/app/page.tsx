@@ -101,7 +101,7 @@ function WaitlistContent() {
                   You <span className="underline decoration-[#FF003C] decoration-4 underline-offset-4">*will*</span> fail your first task.
                 </p>
                 <p className="font-bold text-base md:text-lg text-gray-800 mt-3 leading-snug">
-                  Put <span className="bg-[#00FF66] px-1 border border-black font-black">$5 down right now</span> to pre-order a Bailout Token. Pinky will cover your first $100 mistake when the app drops.
+                  Put <span className="bg-[#00FF66] px-1 border border-black font-black">$5 down right now</span> to pre-order a Bailout Token and <span className="text-[#FF003C] font-black uppercase">secure early access</span>. Pinky will cover your first $100 mistake when the app drops.
                 </p>
               </div>
             </div>

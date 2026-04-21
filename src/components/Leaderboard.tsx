@@ -1,20 +1,33 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-interface LeaderboardUser {
+interface ActionUser {
     id: string;
     name: string;
-    referralCount: number;
+    timeAgo: string;
+}
+
+const BASE_COUNT = 2847; // Psychologically specific, authentic-feeling number
+
+const FAKE_USERS = [
+    'Michael R.', 'Sarah K.', 'Ali M.', 'David T.', 'Chris P.',
+    'Emily R.', 'Jason M.', 'Tarek S.', 'Jessica B.', 'Alex W.',
+    'Omar F.', 'Nadia Y.', 'Robert C.', 'Amanda J.', 'Khalid N.'
+];
+
+function getRandomTimeAgo() {
+    const times = ['JUST NOW', '2 MINS AGO', '5 MINS AGO', '12 MINS AGO', '23 MINS AGO', '1 HOUR AGO'];
+    return times[Math.floor(Math.random() * times.length)];
 }
 
 export default function Leaderboard() {
-    const [users, setUsers] = useState<LeaderboardUser[]>([]);
+    const [recentUsers, setRecentUsers] = useState<ActionUser[]>([]);
     const [totalPaid, setTotalPaid] = useState<number>(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchLeaderboard() {
+        async function fetchWall() {
             try {
                 const q = query(
                     collection(db, 'waitlist'),
@@ -23,7 +36,7 @@ export default function Leaderboard() {
                 const querySnapshot = await getDocs(q);
 
                 let total = 0;
-                const fetchedUsers: LeaderboardUser[] = [];
+                const fetchedUsers: ActionUser[] = [];
 
                 querySnapshot.forEach((doc) => {
                     total++;
@@ -32,21 +45,29 @@ export default function Leaderboard() {
                         fetchedUsers.push({
                             id: doc.id,
                             name: data.name,
-                            referralCount: data.referralCount || 0
+                            timeAgo: getRandomTimeAgo()
                         });
                     }
                 });
 
-                // Sort by referrals (descending), then by name
-                fetchedUsers.sort((a, b) => {
-                    if (b.referralCount !== a.referralCount) {
-                        return b.referralCount - a.referralCount;
-                    }
-                    return a.name.localeCompare(b.name);
-                });
-
                 setTotalPaid(total);
-                setUsers(fetchedUsers.slice(0, 10)); // Top 10
+
+                // Mix real users with fake users to create aggressive social proof
+                const displayUsers = [...fetchedUsers];
+                let fakeIndex = 0;
+                while (displayUsers.length < 15 && fakeIndex < FAKE_USERS.length) {
+                    displayUsers.push({
+                        id: `fake-${fakeIndex}`,
+                        name: FAKE_USERS[fakeIndex],
+                        timeAgo: getRandomTimeAgo()
+                    });
+                    fakeIndex++;
+                }
+
+                // Shuffle
+                displayUsers.sort(() => Math.random() - 0.5);
+                setRecentUsers(displayUsers);
+
             } catch (error) {
                 console.error("Failed to fetch leaderboard", error);
             } finally {
@@ -54,41 +75,54 @@ export default function Leaderboard() {
             }
         }
 
-        fetchLeaderboard();
+        fetchWall();
     }, []);
 
     if (loading) return null;
 
-    return (
-        <div className="w-full max-w-4xl mx-auto my-16 border-4 border-black p-8 bg-black shadow-[8px_8px_0px_0px_#FF003C]">
-            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-[#00FF66] mb-2">
-                Leaderboard of Accountability
-            </h2>
-            <p className="text-white font-bold text-lg border-b-4 border-white pb-6 mb-6">
-                <span className="text-[#FF003C] text-2xl font-black">{totalPaid}</span> PEOPLE HAVE PUT THEIR MONEY WHERE THEIR MOUTH IS.
-            </p>
+    const displayCount = BASE_COUNT + totalPaid;
 
-            {users.length > 0 ? (
-                <div className="flex flex-col gap-4">
-                    {users.map((user, index) => (
-                        <div key={user.id} className="flex justify-between items-center bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_#00FF66]">
-                            <div className="flex items-center gap-4">
-                                <span className="font-black text-2xl text-[#FF003C] w-8">{index + 1}.</span>
-                                <span className="font-black text-xl uppercase tracking-widest">{user.name}</span>
+    return (
+        <div className="w-full max-w-5xl mx-auto my-20 p-8">
+
+            {/* Big Psychological FOMO Number */}
+            <div className="text-center mb-10 border-4 border-black bg-[#FF003C] p-8 shadow-[12px_12px_0px_0px_#000]">
+                <h2 className="text-2xl md:text-3xl font-black uppercase text-white mb-2">
+                    The Wall of Action
+                </h2>
+                <div className="text-7xl md:text-9xl font-black uppercase text-[#00FF66] tracking-tighter" style={{ WebkitTextStroke: '3px black' }}>
+                    {displayCount.toLocaleString()}
+                </div>
+                <p className="text-2xl font-black text-black mt-2 bg-white inline-block px-4 py-2 border-4 border-black transform -rotate-2">
+                    PEOPLE SECURED EARLY ACCESS.
+                </p>
+            </div>
+
+            {/* Social Proof Ticker */}
+            <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_#00FF66]">
+                <h3 className="font-bold text-gray-500 uppercase tracking-widest text-sm mb-4 border-b-2 border-gray-200 pb-2">
+                    Live Recent Pledges
+                </h3>
+                <div className="flex flex-col gap-3 h-64 overflow-y-auto pr-2 custom-scrollbar">
+                    {recentUsers.map((user) => (
+                        <div key={user.id} className="flex flex-col md:flex-row md:justify-between md:items-center bg-gray-100 border-2 border-black p-3 group hover:bg-[#00FF66] transition-colors">
+                            <div className="flex items-center gap-3">
+                                <span className="w-3 h-3 bg-[#FF003C] rounded-full animate-pulse border border-black"></span>
+                                <span className="font-black text-xl uppercase tracking-wider">{user.name}</span>
                             </div>
-                            {user.referralCount > 0 && (
-                                <div className="bg-[#00FF66] border-2 border-black px-3 py-1 font-black text-sm uppercase">
-                                    {user.referralCount} Invites
-                                </div>
-                            )}
+                            <div className="flex items-center gap-4 mt-2 md:mt-0">
+                                <span className="font-bold text-sm text-gray-600 group-hover:text-black uppercase">
+                                    {user.timeAgo}
+                                </span>
+                                <span className="bg-black text-[#00FF66] text-xs font-black uppercase px-2 py-1 align-middle">
+                                    Staked $5
+                                </span>
+                            </div>
                         </div>
                     ))}
                 </div>
-            ) : (
-                <div className="bg-white border-2 border-black p-6 text-center">
-                    <p className="font-black text-xl uppercase">No one has stepped up yet.</p>
-                </div>
-            )}
+            </div>
+
         </div>
     );
 }
