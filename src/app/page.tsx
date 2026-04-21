@@ -13,19 +13,19 @@ export default function WaitlistPage() {
     setStatus('loading');
 
     try {
-      // Execute Firebase write and Stripe initialization concurrently
-      const [, res] = await Promise.all([
-        addDoc(collection(db, 'waitlist'), {
-          email: email.trim(),
-          timestamp: serverTimestamp(),
-          paymentStatus: 'pending'
-        }),
-        fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email.trim() }),
-        })
-      ]);
+      // Execute Firebase write and get document ID explicitly
+      const docRef = await addDoc(collection(db, 'waitlist'), {
+        email: email.trim(),
+        timestamp: serverTimestamp(),
+        paymentStatus: 'pending'
+      });
+
+      // Pass the docRef.id to Stripe to bypass Firebase read restrictions
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), waitlistId: docRef.id }),
+      });
 
       const data = await res.json();
 

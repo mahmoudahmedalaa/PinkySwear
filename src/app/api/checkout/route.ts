@@ -7,9 +7,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_123', {
 
 export async function POST(req: Request) {
     try {
-        const { email } = await req.json();
+        const { email, waitlistId } = await req.json();
 
         const session = await stripe.checkout.sessions.create({
+            client_reference_id: waitlistId,
             payment_method_types: ['card'],
             customer_email: email,
             line_items: [

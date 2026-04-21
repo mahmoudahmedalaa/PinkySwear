@@ -5,7 +5,8 @@ service cloud.firestore {
     // Allow anyone to push their email to the waitlist collection
     match /waitlist/{document=**} {
       allow create: if request.resource.data.email != null;
-      allow read, update, delete: if false;
+      allow update: if request.resource.data.paymentStatus == 'paid';
+      allow read, delete: if false;
     }
   }
 }
