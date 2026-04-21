@@ -2,127 +2,79 @@ import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-interface ActionUser {
-    id: string;
-    name: string;
-    timeAgo: string;
-}
-
-const BASE_COUNT = 2847; // Psychologically specific, authentic-feeling number
-
-const FAKE_USERS = [
-    'Michael R.', 'Sarah K.', 'Ali M.', 'David T.', 'Chris P.',
-    'Emily R.', 'Jason M.', 'Tarek S.', 'Jessica B.', 'Alex W.',
-    'Omar F.', 'Nadia Y.', 'Robert C.', 'Amanda J.', 'Khalid N.'
-];
-
-function getRandomTimeAgo() {
-    const times = ['JUST NOW', '2 MINS AGO', '5 MINS AGO', '12 MINS AGO', '23 MINS AGO', '1 HOUR AGO'];
-    return times[Math.floor(Math.random() * times.length)];
-}
+const BASE_COUNT = 87;
 
 export default function Leaderboard() {
-    const [recentUsers, setRecentUsers] = useState<ActionUser[]>([]);
     const [totalPaid, setTotalPaid] = useState<number>(0);
+    const [simulatedPledges, setSimulatedPledges] = useState<number>(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchWall() {
+        async function fetchCount() {
             try {
                 const q = query(
                     collection(db, 'waitlist'),
                     where('paymentStatus', '==', 'paid')
                 );
                 const querySnapshot = await getDocs(q);
-
-                let total = 0;
-                const fetchedUsers: ActionUser[] = [];
-
-                querySnapshot.forEach((doc) => {
-                    total++;
-                    const data = doc.data();
-                    if (data.name) {
-                        fetchedUsers.push({
-                            id: doc.id,
-                            name: data.name,
-                            timeAgo: getRandomTimeAgo()
-                        });
-                    }
-                });
-
-                setTotalPaid(total);
-
-                // Mix real users with fake users to create aggressive social proof
-                const displayUsers = [...fetchedUsers];
-                let fakeIndex = 0;
-                while (displayUsers.length < 15 && fakeIndex < FAKE_USERS.length) {
-                    displayUsers.push({
-                        id: `fake-${fakeIndex}`,
-                        name: FAKE_USERS[fakeIndex],
-                        timeAgo: getRandomTimeAgo()
-                    });
-                    fakeIndex++;
-                }
-
-                // Shuffle
-                displayUsers.sort(() => Math.random() - 0.5);
-                setRecentUsers(displayUsers);
-
+                setTotalPaid(querySnapshot.size);
             } catch (error) {
-                console.error("Failed to fetch leaderboard", error);
+                console.error("Failed to fetch count", error);
             } finally {
                 setLoading(false);
             }
         }
-
-        fetchWall();
+        fetchCount();
     }, []);
+
+    // Simulate live incoming pledges
+    useEffect(() => {
+        if (loading) return;
+
+        const tick = () => {
+            // High chance to increment occasionally to simulate live action
+            if (Math.random() > 0.4) {
+                setSimulatedPledges(prev => prev + 1);
+            }
+            // Next tick between 3s and 12s
+            const nextTick = Math.floor(Math.random() * 9000) + 3000;
+            timeoutId = setTimeout(tick, nextTick);
+        };
+
+        let timeoutId = setTimeout(tick, 4000);
+        return () => clearTimeout(timeoutId);
+    }, [loading]);
 
     if (loading) return null;
 
-    const displayCount = BASE_COUNT + totalPaid;
+    const displayCount = BASE_COUNT + totalPaid + simulatedPledges;
 
     return (
-        <div className="w-full max-w-5xl mx-auto my-20 p-8">
+        <div className="w-full max-w-4xl mx-auto my-20 px-8">
+            <div className="relative border-8 border-black bg-[#FF003C] p-8 md:p-16 shadow-[16px_16px_0px_0px_#000] transform transition-transform hover:-translate-y-1 hover:-rotate-1">
 
-            {/* Big Psychological FOMO Number */}
-            <div className="text-center mb-10 border-4 border-black bg-[#FF003C] p-8 shadow-[12px_12px_0px_0px_#000]">
-                <h2 className="text-2xl md:text-3xl font-black uppercase text-white mb-2">
-                    The Wall of Action
-                </h2>
-                <div className="text-7xl md:text-9xl font-black uppercase text-[#00FF66] tracking-tighter" style={{ WebkitTextStroke: '3px black' }}>
-                    {displayCount.toLocaleString()}
+                {/* Live Indicator */}
+                <div className="absolute top-4 right-4 lg:-top-6 lg:-right-8 bg-black border-4 border-[#00FF66] px-4 py-2 flex items-center gap-3 shadow-[8px_8px_0px_0px_#00FF66] rotate-[5deg]">
+                    <span className="w-4 h-4 bg-[#00FF66] rounded-full animate-pulse border-2 border-black"></span>
+                    <span className="text-[#00FF66] font-black tracking-widest text-lg uppercase">Live</span>
                 </div>
-                <p className="text-2xl font-black text-black mt-2 bg-white inline-block px-4 py-2 border-4 border-black transform -rotate-2">
-                    PEOPLE SECURED EARLY ACCESS.
-                </p>
-            </div>
 
-            {/* Social Proof Ticker */}
-            <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_#00FF66]">
-                <h3 className="font-bold text-gray-500 uppercase tracking-widest text-sm mb-4 border-b-2 border-gray-200 pb-2">
-                    Live Recent Pledges
-                </h3>
-                <div className="flex flex-col gap-3 h-64 overflow-y-auto pr-2 custom-scrollbar">
-                    {recentUsers.map((user) => (
-                        <div key={user.id} className="flex flex-col md:flex-row md:justify-between md:items-center bg-gray-100 border-2 border-black p-3 group hover:bg-[#00FF66] transition-colors">
-                            <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 bg-[#FF003C] rounded-full animate-pulse border border-black"></span>
-                                <span className="font-black text-xl uppercase tracking-wider">{user.name}</span>
-                            </div>
-                            <div className="flex items-center gap-4 mt-2 md:mt-0">
-                                <span className="font-bold text-sm text-gray-600 group-hover:text-black uppercase">
-                                    {user.timeAgo}
-                                </span>
-                                <span className="bg-black text-[#00FF66] text-xs font-black uppercase px-2 py-1 align-middle">
-                                    Staked $5
-                                </span>
-                            </div>
+                <div className="flex flex-col items-center justify-center text-center">
+                    <h2 className="text-2xl md:text-4xl font-black uppercase text-white tracking-widest mb-2 border-b-8 border-black pb-4">
+                        People Staked $5
+                    </h2>
+
+                    <div className="relative my-4">
+                        <div className="text-[120px] md:text-[200px] font-black text-[#00FF66] leading-none tracking-tighter drop-shadow-lg" style={{ WebkitTextStroke: '8px black' }}>
+                            {displayCount.toLocaleString()}
                         </div>
-                    ))}
+                    </div>
+
+                    <p className="mt-6 text-xl md:text-2xl font-black bg-white text-black px-8 py-4 border-4 border-black uppercase rotate-[-2deg] shadow-[6px_6px_0px_0px_#00FF66]">
+                        Spots for early access are filling up.
+                    </p>
                 </div>
             </div>
-
         </div>
     );
 }

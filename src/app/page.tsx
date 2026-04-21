@@ -112,14 +112,14 @@ function WaitlistContent() {
                 <p className="font-bold text-base mt-2">We&#39;ll alert you when we launch. No running away now.</p>
               </div>
             ) : (
-              <form className="flex flex-col xl:flex-row gap-4 mt-2" onSubmit={handleSubmit}>
+              <form className="flex flex-col gap-4 mt-2" onSubmit={handleSubmit}>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={status === 'loading'}
-                  placeholder="YOUR FULL NAME"
-                  className="flex-1 px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold border-box w-full uppercase disabled:opacity-50 transition-colors"
+                  placeholder="1. ENTER YOUR FULL NAME"
+                  className="w-full px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold uppercase disabled:opacity-50 transition-colors"
                   required
                 />
                 <input
@@ -127,21 +127,21 @@ function WaitlistContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={status === 'loading'}
-                  placeholder="YOUR.EMAIL@LOSER.COM"
-                  className="flex-1 px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold border-box w-full uppercase disabled:opacity-50 transition-colors"
+                  placeholder="2. ENTER YOUR BEST EMAIL"
+                  className="w-full px-5 py-5 text-lg font-black border-4 border-black bg-white focus:bg-[#00FF66]/10 outline-none placeholder:text-gray-400 placeholder:font-bold uppercase disabled:opacity-50 transition-colors"
                   required
                 />
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="px-8 py-5 bg-[#FF003C] text-white text-xl font-black uppercase tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#000] transition-all whitespace-nowrap cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0px_0px_#000] flex items-center justify-center gap-3"
+                  className="w-full px-8 py-5 mt-2 bg-[#FF003C] text-white text-xl font-black uppercase tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_#000] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#000] transition-all whitespace-nowrap cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0px_0px_#000] flex items-center justify-center gap-3"
                 >
                   {status === 'loading' ? (
                     <>
                       <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Betting...
+                      Processing...
                     </>
-                  ) : 'Bet On Yourself'}
+                  ) : 'Lock In & Pre-Order'}
                 </button>
               </form>
             )}
