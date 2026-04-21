@@ -46,7 +46,12 @@ export default function WaitlistPage() {
       {/* Top Nav */}
       <nav className="w-full px-8 py-6 flex justify-between items-center border-b-4 border-black bg-white sticky top-0 z-50">
         <h1 className="text-2xl font-black tracking-tighter">PinkySwear<span className="text-[#00FF66]">.</span></h1>
-        <div className="text-sm font-bold uppercase tracking-widest px-5 py-3 border-4 border-black bg-[#FF003C] text-white shadow-[4px_4px_0px_0px_#000] transform transition hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#000] cursor-pointer">
+        <div
+          onClick={() => {
+            document.getElementById('payment-form')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="text-sm font-bold uppercase tracking-widest px-5 py-3 border-4 border-black bg-[#FF003C] text-white shadow-[4px_4px_0px_0px_#000] transform transition hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#000] cursor-pointer"
+        >
           Beta Waitlist
         </div>
       </nav>
@@ -76,7 +81,7 @@ export default function WaitlistPage() {
           </p>
 
           {/* Brutalist Input Form */}
-          <div className="bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_#000] flex flex-col gap-6 mt-4 w-full">
+          <div id="payment-form" className="bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_#000] flex flex-col gap-6 mt-4 w-full">
             <div>
               <h3 className="font-black text-3xl md:text-4xl uppercase tracking-tighter text-[#FF003C] leading-none mb-4">
                 Pre-Order a Bailout Token
