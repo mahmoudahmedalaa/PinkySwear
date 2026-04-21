@@ -45,7 +45,7 @@ export default function WaitlistPage() {
 
       {/* Top Nav */}
       <nav className="w-full px-8 py-6 flex justify-between items-center border-b-4 border-black bg-white sticky top-0 z-50">
-        <h1 className="text-2xl font-black tracking-tighter uppercase">PinkySwear<span className="text-[#00FF66]">.</span></h1>
+        <h1 className="text-2xl font-black tracking-tighter">PinkySwear<span className="text-[#00FF66]">.</span></h1>
         <div className="text-sm font-bold uppercase tracking-widest px-5 py-3 border-4 border-black bg-[#FF003C] text-white shadow-[4px_4px_0px_0px_#000] transform transition hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_0px_#000] cursor-pointer">
           Beta Waitlist
         </div>
