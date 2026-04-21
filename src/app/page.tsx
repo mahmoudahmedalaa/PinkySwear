@@ -13,19 +13,20 @@ export default function WaitlistPage() {
     setStatus('loading');
 
     try {
-      // 1. Secure email in Firebase as pending
-      await addDoc(collection(db, 'waitlist'), {
-        email: email.trim(),
-        timestamp: serverTimestamp(),
-        paymentStatus: 'pending'
-      });
+      // Execute Firebase write and Stripe initialization concurrently
+      const [, res] = await Promise.all([
+        addDoc(collection(db, 'waitlist'), {
+          email: email.trim(),
+          timestamp: serverTimestamp(),
+          paymentStatus: 'pending'
+        }),
+        fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim() }),
+        })
+      ]);
 
-      // 2. Initialize Stripe Checkout
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
-      });
       const data = await res.json();
 
       if (data.url) {
