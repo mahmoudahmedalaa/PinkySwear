@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// We fall back to a mock test key if the user hasn't set up the .env yet
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_123', {
-    apiVersion: '2025-01-27.acacia',
+    apiVersion: '2026-03-25.dahlia',
 });
 
 export async function POST(req: Request) {
